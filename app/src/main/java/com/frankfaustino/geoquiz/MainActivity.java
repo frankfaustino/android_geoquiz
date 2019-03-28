@@ -1,6 +1,5 @@
 package com.frankfaustino.geoquiz;
 
-import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mPrevButton;
     private ImageButton mNextButton;
     private TextView mQuestionTextView;
+    private static final String TAG = "QuizActivity";
 
     private Question[] mQuestionBank = new Question[] {
             new Question(R.string.question_australia, true),
@@ -29,10 +29,14 @@ public class MainActivity extends AppCompatActivity {
 
     private int mCurrentIndex = 0;
 
+    // abstract @interface indicates that a method declaration is intended to override a method declaration in a supertype.
+    // this annotation asks the compiler to ensure that the superclass has the method.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.i(TAG, "onCreate() called");
 
         mQuestionTextView = findViewById(R.id.question_text_view);
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
@@ -82,6 +86,37 @@ public class MainActivity extends AppCompatActivity {
         });
 
         updateQuestion();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i(TAG, "onStart() called");
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, "onResume() called");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause() called");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, "onStop() called");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy() called");
     }
 
     private void updateQuestion() {
