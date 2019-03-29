@@ -1,6 +1,8 @@
 package com.frankfaustino.geoquiz;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,8 +20,10 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mPrevButton;
     private ImageButton mNextButton;
     private TextView mQuestionTextView;
+
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Question[] mQuestionBank = new Question[] {
             new Question(R.string.question_australia, true),
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
+    private boolean mIsCheater;
 
     // abstract @interface indicates that a method declaration is intended to override a method declaration in a supertype.
     // this annotation asks the compiler to ensure that the superclass has the method.
@@ -88,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+                mIsCheater = false;
                 updateQuestion();
             }
         });
@@ -100,11 +106,26 @@ public class MainActivity extends AppCompatActivity {
 //                Intent intent = new Intent(MainActivity.this, CheatActivity.class);
                 boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
                 Intent intent = CheatActivity.newIntent(MainActivity.this, answerIsTrue);
-                startActivity(intent);
+//                startActivity(intent);
+                startActivityForResult(intent, REQUEST_CODE_CHEAT);
             }
         });
 
         updateQuestion();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+
+        if (resultCode == REQUEST_CODE_CHEAT) {
+            if (data == null) {
+                return;
+            }
+            mIsCheater = CheatActivity.wasAnswerShown(data);
+        }
     }
 
     @Override
@@ -159,10 +180,14 @@ public class MainActivity extends AppCompatActivity {
 
         int messageResId;
 
-        if (userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
+        if (mIsCheater) {
+            messageResId = R.string.judgement_toast;
         } else {
-            messageResId = R.string.incorrect_toast;
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+            } else {
+                messageResId = R.string.incorrect_toast;
+            }
         }
 
         Toast toast = Toast.makeText(this, messageResId, Toast.LENGTH_SHORT);
